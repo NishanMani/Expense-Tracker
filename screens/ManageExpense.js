@@ -1,12 +1,21 @@
-import { useLayoutEffect } from 'react';
-import { Text } from 'react-native';
+import { useLayoutEffect, useContext} from 'react';
+import { StyleSheet,View} from 'react-native';
 import IconButton from '../components/ExpensesOutput/UI/IconButton';
 import { GlobalStyles } from '../constants/styles';
+import Button from '../components/ExpensesOutput/UI/Button';
+import { ExpensesContext } from '../store/expenses-context';
+import ExpenseForm from '../components/ExpensesOutput/ManageExpense/ExpenseForm';
 
 
-function ManageExpense({route, navigation}) {
+function ManageExpense({route, navigation})  {
+  const expensesCtx = useContext(ExpensesContext);
+
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
+
+  const selectedExpense = expensesCtx.expenses.find(
+    (expense) => expense.id === editedExpenseId
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -15,14 +24,35 @@ function ManageExpense({route, navigation}) {
   }, [navigation, isEditing]);
 
   function deleteExpenseHandler() {
-    //delete logic
+    expensesCtx.deleteExpense(editedExpenseId);
+    navigation.goBack();
+  }
+
+  function cancelHandler() {
+    navigation.goBack();
+  }
+
+  function confirmHandler(expenseData) {
+    if (isEditing) {
+      expensesCtx.updateExpense(editedExpenseId, expenseData);
+    } else {
+      expensesCtx.addExpense(expenseData);
+    }
+    navigation.goBack();
   }
 
   return (
     <View style={styles.container}>
-      {isEditing && (
+      <ExpenseForm 
+       submitButtonLabel={isEditing ? 'Update' : 'Add'} 
+       onSubmit={confirmHandler}
+       onCancel={cancelHandler} 
+       defaultValues={selectedExpense}
+      />
+     
+      {isEditing && ( 
       <View style={styles.deleteContainer}>
-      <IconButton icon="trash" color={GlobalStyles.color.error500}
+      <IconButton icon="trash" color={GlobalStyles.colors.error500}
        size={36} onPress={deleteExpenseHandler}/>
        </View>
        )}
@@ -32,12 +62,13 @@ function ManageExpense({route, navigation}) {
 
 export default ManageExpense;
 
-const styles = stylesheet.create({
+const styles = StyleSheet.create({
   container: {
     flex:1,
     padding:24,
     backgroundColor: GlobalStyles.colors.primary800,
   },
+
   deleteContainer: {
     marginTop:16,
     paddingTop:8,
