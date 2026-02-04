@@ -83,7 +83,7 @@ function ExpenseForm({submitButtonLabel,onCancel,onSubmit, defaultValues}) {
           label="Date"
           invalid={!inputs.date.isValid}
           textInputConfig={{
-            placeholder: 'DD-MM-YYYY',
+            placeholder: 'YYYY-MM-DD',
             maxLength: 10,
             onChangeText: inputChangedHandler.bind(this, 'date'),
             value: inputs.date.value,

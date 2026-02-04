@@ -14,14 +14,22 @@ function ExpenseItem({id,description, amount, date})  {
     return (
      <Pressable onPress={expensePressHandler} style={({pressed}) => pressed && styles.pressed}>
         <View style={styles.expenseItem}>
-            <View>
-                <Text style={[styles.textBase, styles.description]}>{description}</Text>
-                <Text style={[styles.textBase]}>{getFormattedDate(date)}</Text>
-            </View>
-            <View style={styles.priceContainer}>
-                <Text style={styles.amount}>{amount}</Text>
-            </View>
-        </View>
+  <View style={styles.details}>
+    <Text
+      style={[styles.textBase, styles.description]}
+      numberOfLines={2}
+      ellipsizeMode="tail"
+    >
+      {description}
+    </Text>
+    <Text style={styles.textBase}>{getFormattedDate(date)}</Text>
+  </View>
+
+  <View style={styles.priceContainer}>
+    <Text style={styles.amount}>{amount}</Text>
+  </View>
+</View>
+
     </Pressable>
     )
 }
@@ -64,5 +72,10 @@ const styles = StyleSheet.create({
     amount: {
         color: GlobalStyles.colors.primary500,
         fontWeight:'bold',
-    }
+    },
+    details: {
+  flex: 1,
+  marginRight: 12,
+},
+
 })
