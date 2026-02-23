@@ -4,7 +4,14 @@ import ExpensesList from './ExpensesList';
 import { GlobalStyles } from '../../constants/styles';
 
 
-function ExpensesOutput({expenses, expensesPeriod, fallbackText}) {
+function ExpensesOutput({
+  expenses,
+  expensesPeriod,
+  fallbackText,
+  monthLabel,
+  onPrevMonth,
+  onNextMonth,
+}) {
   let content = <Text style={styles.fallbackText}>{fallbackText}</Text>
 
   if (expenses.length > 0) {
@@ -13,7 +20,13 @@ function ExpensesOutput({expenses, expensesPeriod, fallbackText}) {
 
     return (
        <View style={styles.container}>   
-            <ExpensesSummary expenses={expenses} periodName={expensesPeriod}/>
+            <ExpensesSummary
+              expenses={expenses}
+              periodName={expensesPeriod}
+              monthLabel={monthLabel}
+              onPrevMonth={onPrevMonth}
+              onNextMonth={onNextMonth}
+            />
             {content}
        </View>
    );

@@ -8,6 +8,8 @@ import ManageExpense from './screens/ManageExpense';
 import AllExpenses from './screens/AllExpenses';
 import RecentExpenses from './screens/RecentExpenses';
 import AuthScreen from './screens/AuthScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
 import { GlobalStyles } from './constants/styles';
 import IconButton from './components/ExpensesOutput/UI/IconButton';
 import ExpensesContextProvider from './store/expenses-context';
@@ -18,16 +20,24 @@ const BottomTabs = createBottomTabNavigator();
 function ExpensesOverview() {
   return (
     <BottomTabs.Navigator 
-    screenOptions={({navigation}) => ({
+    screenOptions={({navigation, route}) => ({
       headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
       headerTintColor: 'white',
       tabBarStyle: { backgroundColor: GlobalStyles.colors.primary500 },
       tabBarActiveTintColor: GlobalStyles.colors.accent500,
-      headerRight:({tintColor}) => ( 
-      <IconButton icon="add" 
-      size={24} color={tintColor} 
-      onPress={() => navigation.navigate('ManageExpense')} />
-    ),
+      headerRight: ({ tintColor }) => {
+        if (route.name === 'Settings') {
+          return null;
+        }
+        return (
+          <IconButton
+            icon="add"
+            size={24}
+            color={tintColor}
+            onPress={() => navigation.navigate('ManageExpense')}
+          />
+        );
+      },
     })}>
       <BottomTabs.Screen name="RecentExpenses" 
       component={RecentExpenses} 
@@ -42,6 +52,15 @@ function ExpensesOverview() {
         tabBarLabel: 'All Expenses',
         tabBarIcon: ({ color, size }) => <Ionicons name="list" size={size} color={color} />,
       }}/>
+      <BottomTabs.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: 'Settings',
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
+        }}
+      />
     </BottomTabs.Navigator>
   );
 }
@@ -72,6 +91,11 @@ export default function App() {
           component={ManageExpense} options={{
             presentation: 'modal'
           }}/>
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfileScreen}
+            options={{ title: 'Edit Profile' }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       </ExpensesContextProvider>
