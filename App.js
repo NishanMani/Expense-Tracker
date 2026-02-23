@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ManageExpense from './screens/ManageExpense';
 import AllExpenses from './screens/AllExpenses';
 import RecentExpenses from './screens/RecentExpenses';
+import AuthScreen from './screens/AuthScreen';
 import { GlobalStyles } from './constants/styles';
 import IconButton from './components/ExpensesOutput/UI/IconButton';
 import ExpensesContextProvider from './store/expenses-context';
@@ -52,10 +53,17 @@ export default function App() {
       <StatusBar style="light" />
       <ExpensesContextProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{
+        <Stack.Navigator
+        initialRouteName="Auth"
+        screenOptions={{
           headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
           headerTintColor: 'white',
         }}>
+          <Stack.Screen
+           name="Auth"
+           component={AuthScreen}
+           options={{ headerShown: false }}
+          />
           <Stack.Screen name="ExpensesOverview"
            component={ExpensesOverview} 
            options ={{ headerShown: false }}

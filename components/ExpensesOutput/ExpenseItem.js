@@ -26,7 +26,7 @@ function ExpenseItem({id,description, amount, date})  {
   </View>
 
   <View style={styles.priceContainer}>
-    <Text style={styles.amount}>{amount}</Text>
+    <Text style={styles.amount}>₹{Number(amount).toFixed(2)}</Text>
   </View>
 </View>
 

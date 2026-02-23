@@ -1,32 +1,54 @@
-import {useState} from 'react';
-import { View, Text, StyleSheet ,Alert} from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, Platform,Alert } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Input from '../ManageExpense/input';
-import Button from '../UI/Button'; 
-import { getFormattedDate} from '../../../util/date';
+import Button from '../UI/Button';
+import { getFormattedDate } from '../../../util/date';
 import { GlobalStyles } from '../../../constants/styles';
 
-
-function ExpenseForm({submitButtonLabel,onCancel,onSubmit, defaultValues}) {
-    const[inputs,setInputs]=useState({
-        amount:{ 
-          value: defaultValues ? defaultValues.amount.toString() : '', 
-          isValid: true,
-        },
-        date:{
-          value:defaultValues ? getFormattedDate(defaultValues.date) : '', 
-          isValid: true
-        },
-        description:{
-          value:defaultValues ? defaultValues.description : '',
-           isValid:true
-          },
-    }); 
+function ExpenseForm({ submitButtonLabel, onCancel, onSubmit, defaultValues }) {
+  const [inputs, setInputs] = useState({
+    amount: {
+      value: defaultValues ? defaultValues.amount.toString() : '',
+      isValid: true,
+    },
+    date: {
+      value: defaultValues ? new Date(defaultValues.date) : new Date(),
+      isValid: true,
+    },
+    description: {
+      value: defaultValues ? defaultValues.description : '',
+      isValid: true,
+    },
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   function inputChangedHandler(inputIdentifier, enteredValue) {
     setInputs((currentInputs) => {
       return {
         ...currentInputs,
-        [inputIdentifier]: { value: enteredValue, isValid: true},
+        [inputIdentifier]: { value: enteredValue, isValid: true },
+      };
+    });
+  }
+
+  function showDatePickerHandler() {
+    setShowDatePicker((currentState) => !currentState);
+  }
+
+  function dateChangeHandler(event, selectedDate) {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (event.type === 'dismissed' || !selectedDate) {
+      return;
+    }
+
+    setInputs((currentInputs) => {
+      return {
+        ...currentInputs,
+        date: { value: selectedDate, isValid: true },
       };
     });
   }
@@ -34,17 +56,18 @@ function ExpenseForm({submitButtonLabel,onCancel,onSubmit, defaultValues}) {
   function submitHandler() {
     const expenseData = {
       amount: +inputs.amount.value,
-      date: new Date(inputs.date.value),
+      date: inputs.date.value,
       description: inputs.description.value,
     };
 
     const amountIsValid = !isNaN(expenseData.amount) && expenseData.amount > 0;
-    const dateIsValid = expenseData.date.toString() !== 'Invalid Date';
+    const dateIsValid =
+      expenseData.date instanceof Date && !isNaN(expenseData.date.getTime());
     const descriptionIsValid = expenseData.description.trim().length > 0;
 
     if (!amountIsValid || !dateIsValid || !descriptionIsValid) {
       
-      // Alert.alert('Invalid input', 'Please check your input values');
+       Alert.alert('Invalid input', 'Please check your input values');
       setInputs((currentInputs) => {
         return {
           amount: { value: currentInputs.amount.value, isValid: amountIsValid },
@@ -62,7 +85,7 @@ function ExpenseForm({submitButtonLabel,onCancel,onSubmit, defaultValues}) {
   const formIsInvalid =
     !inputs.amount.isValid ||
     !inputs.date.isValid ||
-    !inputs.description.isValid;    
+    !inputs.description.isValid;
 
   return (
     <View style={styles.form}>
@@ -70,7 +93,7 @@ function ExpenseForm({submitButtonLabel,onCancel,onSubmit, defaultValues}) {
       <View style={styles.inputsRow}>
         <Input
           style={styles.rowInput}
-          label="Amount"
+          label="Amount (₹)"
           invalid={!inputs.amount.isValid}
           textInputConfig={{
             keyboardType: 'decimal-pad',
@@ -78,17 +101,28 @@ function ExpenseForm({submitButtonLabel,onCancel,onSubmit, defaultValues}) {
             value: inputs.amount.value,
           }}
         />
-        <Input
-          style={styles.rowInput}
-          label="Date"
-          invalid={!inputs.date.isValid}
-          textInputConfig={{
-            placeholder: 'YYYY-MM-DD',
-            maxLength: 10,
-            onChangeText: inputChangedHandler.bind(this, 'date'),
-            value: inputs.date.value,
-          }}
-        />
+        <View style={[styles.rowInput, styles.dateContainer]}>
+          <Text style={[styles.label, !inputs.date.isValid && styles.invalidLabel]}>
+            Date
+          </Text>
+          <Pressable
+            onPress={showDatePickerHandler}
+            style={[
+              styles.dateButton,
+              !inputs.date.isValid && styles.invalidDateButton,
+            ]}
+          >
+            <Text style={styles.dateText}>{getFormattedDate(inputs.date.value)}</Text>
+          </Pressable>
+          {showDatePicker && (
+            <DateTimePicker
+              mode="date"
+              value={inputs.date.value}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={dateChangeHandler}
+            />
+          )}
+        </View>
       </View>
       <Input
         label="Description"
@@ -129,19 +163,42 @@ const styles = StyleSheet.create({
   rowInput: {
     flex: 1,
   },
-   buttons: {
-    flexDirection:'row',
-    justifyContent:'center',
-    alignItems:'center',
+  dateContainer: {
+    marginHorizontal: 4,
+    marginVertical: 8,
   },
-  button:{
-    minWidth:120,
-    marginHorizontal:8,
+  label: {
+    fontSize: 12,
+    color: GlobalStyles.colors.primary100,
+    marginBottom: 4,
   },
-  invalidText:{
-    textAlign:'center',
+  dateButton: {
+    backgroundColor: GlobalStyles.colors.primary100,
+    padding: 10,
+    borderRadius: 6,
+  },
+  dateText: {
+    fontSize: 18,
+    color: GlobalStyles.colors.primary700,
+  },
+  buttons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  button: {
+    minWidth: 120,
+    marginHorizontal: 8,
+  },
+  invalidText: {
+    textAlign: 'center',
     color: GlobalStyles.colors.error500,
-    margin:8,
+    margin: 8,
   },
-
+  invalidLabel: {
+    color: GlobalStyles.colors.error500,
+  },
+  invalidDateButton: {
+    backgroundColor: GlobalStyles.colors.error50,
+  },
 });
